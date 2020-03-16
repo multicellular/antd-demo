@@ -1,0 +1,74 @@
+.login-wrapper {
+    .login-content {
+      border-radius: 3px;
+      width: 400px;
+      padding: 32px 40px 48px;
+      margin: 20px auto;
+      background-color: #fff;
+      .login-title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333333;
+        margin-bottom: 20px;
+      }
+      .form-item {
+        margin-bottom: 30px;
+        &.last {
+          margin-bottom: 0px;
+        }
+        .input-wrapper /deep/ input {
+          height: 48px;
+        }
+      }
+      & /deep/ .el-form-item.is-success .el-input__inner,
+      .el-form-item.is-success .el-input__inner:focus,
+      .el-form-item.is-success .el-textarea__inner,
+      .el-form-item.is-success .el-textarea__inner:focus {
+        border-color: #ccc;
+      }
+      .login-btn {
+        margin-top: 10px;
+        border: none;
+        .login-btn-text {
+          font-size: 16px;
+          color: #fff;
+        }
+      }
+      .tip-wrapper {
+        padding-top: 10px;
+        .input-error {
+          color: red;
+          font-size: 12px;
+          &.no-error {
+            opacity: 0;
+          }
+        }
+      }
+      .tip-register {
+        padding-top: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .register-link {
+          color: #0079ff;
+        }
+        .forget-pwd {
+          cursor: pointer;
+          color: #0079ff;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+  .input-wrapper {
+    width: 100%;
+  }
+  @media screen and (max-width: 768px) {
+    .login-wrapper .login-content {
+      width: 100%;
+    }
+  }
