@@ -1,11 +1,7 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Form, Input, Button } from "antd";
 
-import HookContext from "@stores/hookReducers";
-
 const TradeForm = props => {
-  const [state] = useContext(HookContext);
-  console.log("hook get userinfo {name:test123}", state);
   const onFinish = () => {};
   const onFinishFailed = () => {};
   const formRef = React.createRef();

@@ -13,8 +13,6 @@ import Footer from "@views/base/Footer";
 import "./App.less";
 import { setTokens, getUserInfo } from "@stores/actions";
 
-import { HookProvider } from "@stores/hookReducers";
-
 let tokens = cookies.get("r-tokens");
 try {
   tokens = JSON.parse(tokens) || {};
@@ -36,21 +34,19 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <HookProvider>
-          <Provider store={store} api={api}>
-            <BrowserRouter>
-              <header id="header">
-                <Header />
-              </header>
-              <main id="main">
-                <Routes />
-                <footer id="footer">
-                  <Footer />
-                </footer>
-              </main>
-            </BrowserRouter>
-          </Provider>
-        </HookProvider>
+        <Provider store={store} api={api}>
+          <BrowserRouter>
+            <header id="header">
+              <Header />
+            </header>
+            <main id="main">
+              <Routes />
+              <footer id="footer">
+                <Footer />
+              </footer>
+            </main>
+          </BrowserRouter>
+        </Provider>
       </div>
     );
   }
