@@ -1,23 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { BaseApi } from "@apis";
 // import "@libs/charting_library/charting_library.min.js";
 import Datafeeds from "@libs/datafeed.js";
 
-class KLine extends React.Component {
-  componentDidMount() {
-    this.curMarket = this.props.market || "btccnst";
-    this.initChart();
-  }
+const KLine = props => {
+  let curMarket = props.market || "btccnst",
+    datafeed,
+    widget,
+    curResolution = 60;
 
-  initChart() {
-    this.curResolution = 60;
-    BaseApi.getKChart({ market: this.curMarket }).then(res => {
-      this.randerChart(res, this.curMarket);
+  useEffect(() => {
+    initChart();
+  }, []);
+
+  function initChart() {
+    BaseApi.getKChart({ market: curMarket }).then(res => {
+      randerChart(res, curMarket);
     });
   }
 
-  randerChart(data, market) {
+  function randerChart(data, market) {
     // let windowWidth = window.outerWidth;
     // if (windowWidth > 768) {
     //   localStorage["tradingview.IntervalWidget.quicks"] = JSON.stringify({
@@ -51,21 +54,21 @@ class KLine extends React.Component {
     //     localMode = "ko";
     //     break;
     // }
-    this.Datafeed = new Datafeeds({
+    datafeed = new Datafeeds({
       name: market,
       data: data,
-      resolution: 60,
+      resolution: curResolution,
       theme: "Light",
       locale: localMode
     });
-    this.widget = new TradingView.widget(this.Datafeed.config);
+    widget = new TradingView.widget(datafeed.config);
     // console.log(this.widget)
-    this.widget.onChartReady(() => {
+    widget.onChartReady(() => {
       //   localStorage["tradingview.current_theme.name"] = this.global.mode;
-      this.curResolution = 60;
+      curResolution = 60;
       const color = ["#965fc4", "#84aad5", "#55b263", "#b7248a", "#4f1ab7"];
       [7, 25, 60, 99].forEach((item, index) => {
-        this.widget
+        widget
           .chart()
           .createStudy("Moving Average", !1, !1, [item], function() {}, {
             "plot.color.0": color[index]
@@ -75,36 +78,34 @@ class KLine extends React.Component {
     });
   }
 
-  render() {
-    return (
-      <>
-        <div className="kline-header">
-          <div className="market-name">BTC/CNST</div>
-          <div>
-            <div className="lab">最新价</div>
-            <div>6000.1212</div>
-          </div>
-          <div>
-            <div className="lab">24h成交量</div>
-            <div>2131.12</div>
-          </div>
-          <div>
-            <div className="lab">24h最高价</div>
-            <div>6000.8676</div>
-          </div>
-          <div>
-            <div className="lab">24h最低价</div>
-            <div>5081.9722</div>
-          </div>
-          <div>
-            <div className="lab">24h涨跌</div>
-            <div>+12%</div>
-          </div>
+  return (
+    <>
+      <div className="kline-header">
+        <div className="market-name">BTC/CNST</div>
+        <div>
+          <div className="lab">最新价</div>
+          <div>6000.1212</div>
         </div>
-        <div className="chart-box" id="tv_chart_container"></div>
-      </>
-    );
-  }
-}
+        <div>
+          <div className="lab">24h成交量</div>
+          <div>2131.12</div>
+        </div>
+        <div>
+          <div className="lab">24h最高价</div>
+          <div>6000.8676</div>
+        </div>
+        <div>
+          <div className="lab">24h最低价</div>
+          <div>5081.9722</div>
+        </div>
+        <div>
+          <div className="lab">24h涨跌</div>
+          <div>+12%</div>
+        </div>
+      </div>
+      <div className="chart-box" id="tv_chart_container"></div>
+    </>
+  );
+};
 
 export default KLine;

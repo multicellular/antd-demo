@@ -1,175 +1,68 @@
-import React from "react";
-import { connect } from "react-redux";
-import { setUserInfo } from "@stores/actions";
+import React, { useContext, useEffect } from "react";
 import { BaseApi, AccountApi } from "@apis";
 import { Form, Input, Modal, Button, Checkbox, Tabs, message } from "antd";
 import "@libs/gt";
 import "./less/login.less";
+
+import actions, { GlobalContext } from "@stores/hookActions";
+
 const { TabPane } = Tabs;
 
-class Login extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isLoading: false,
-      dialogVisible: false,
-      isGoogleCheckBtnLoading: false,
-      needGeetest: false,
-      //   error: {
-      //     flag: false,
-      //     text: "Hello"
-      //   },
-      loginForm: {
-        phone: "",
-        email: "",
-        password: ""
-      },
-      //   gt_server_status: "",
-      //   user_id: "",
-      userInfo: "",
-      geetestLoading: true,
-      activeKey: "email",
-      isChangeTab: false,
-      otp: ""
-    };
-  }
+const Login = props => {
+  const [, dispatch] = useContext(GlobalContext);
+  const History = props.history;
+  let isLoading = false,
+    dialogVisible = false,
+    isGoogleCheckBtnLoading = false,
+    needGeetest = false,
+    userInfo = "",
+    geetestLoading = true,
+    activeKey = "email",
+    otp = "";
+  let gt_server_status, user_id;
+  const formRef = React.createRef();
+  let onSubmit = () => {};
 
-  formRef = React.createRef();
+  useEffect(() => {
+    geetest();
+  }, []);
 
-  componentDidMount() {
-    // 极验证初始化
-    this.geetest();
-    console.log(this.props);
-  }
-
-  render() {
-    const layout = {
-      labelCol: { span: 8 },
-      wrapperCol: { span: 16 }
-    };
-    const tailLayout = {
-      wrapperCol: { offset: 8, span: 16 }
-    };
-    const onFinish = values => {
-      //   this.postLogin();
-      if (this.onSubmit) {
-        this.onSubmit();
-      }
-    };
-    const onFinishFailed = error => {};
-    return (
-      <div className="login-wrapper" loading="isLoading">
-        <div className="login-content">
-          <p className="login-title">Login</p>
-          <Form
-            ref={this.formRef}
-            {...layout}
-            name="basic"
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-          >
-            <Tabs
-              defaultActiveKey="1"
-              activeKey={this.state.activeKey}
-              onChange={this.onTabChange}
-            >
-              <TabPane tab="email" key="email">
-                <Form.Item
-                  label="email"
-                  name="email"
-                  rules={[
-                    { required: true, message: "Please input your email!" }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </TabPane>
-              <TabPane tab="phone" key="phone">
-                <Form.Item
-                  label="Phone"
-                  name="Phone"
-                  rules={[
-                    { required: true, message: "Please input your Phone!" }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </TabPane>
-            </Tabs>
-
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[
-                { required: true, message: "Please input your password!" }
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-
-            <Form.Item {...tailLayout} name="remember" valuePropName="checked">
-              <Checkbox>Remember me</Checkbox>
-            </Form.Item>
-
-            <Form.Item {...tailLayout}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={this.state.geetestLoading}
-              >
-                Login
-              </Button>
-            </Form.Item>
-          </Form>
-          <div className="tip-register">
-            <router-link className="forget-pwd" to="/forgetpwd">
-              login.forget-pw
-            </router-link>
-
-            <span className="register-link" onClick={this.goRegister}>
-              login.register
-            </span>
-          </div>
-        </div>
-        <GoogleCheck
-          //   ref="google"
-          confirmLoading={this.state.isGoogleCheckBtnLoading}
-          onCancel={this.cancelCheckGoogle}
-          onOk={this.submitCheckGoogle}
-          visible={this.state.dialogVisible}
-          onChange={this.handleOtpChange}
-        />
-      </div>
-    );
-  }
-
-  cancelCheckGoogle = () => {
-    this.userInfo = "";
-    this.setState({
-      dialogVisible: false
-    });
-    // this.dialogVisible = false;
+  const layout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 }
+  };
+  const tailLayout = {
+    wrapperCol: { offset: 8, span: 16 }
   };
 
-  onTabChange = () => {};
-  goRegister = () => {};
+  function onFinish(values) {
+    onSubmit();
+  }
 
-  onClickLogin = () => {};
+  function onFinishFailed(error) {}
 
-  geetest() {
-    var initGeetest = window.initGeetest;
+  function cancelCheckGoogle() {
+    userInfo = "";
+    dialogVisible = false;
+  }
+
+  function onTabChange() {}
+
+  function goRegister() {}
+
+  // const onClickLogin = () => {};
+
+  function geetest() {
+    const initGeetest = window.initGeetest;
     // this.geetestLoading = true;
     BaseApi.getGeeTest().then(data => {
       if (!data) {
         return;
       }
       // this.geetestLoading = false;
-      this.setState({
-        geetestLoading: false
-      });
-      this.gt_server_status = data.success;
-      this.user_id = data.user_id;
+      geetestLoading = false;
+      gt_server_status = data.success;
+      user_id = data.user_id;
       // 使用initGeetest接口
       // 参数1：配置参数
       // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
@@ -181,168 +74,189 @@ class Login extends React.Component {
           product: "bind", // 产品形式，包括：float，embed，popup。注意只对PC版验证码有效
           offline: !data.success // 表示用户后台检测极验服务器是否宕机，一般不需要关注
         },
-        this.geetestHandler
+        geetestHandler
       );
     });
   }
 
-  geetestHandler = captchaObj => {
+  function geetestHandler(captchaObj) {
     captchaObj
       .onReady(() => {
         //验证码ready之后才能调用verify方法显示验证码
       })
       .onSuccess(() => {
-        this.postLogin(captchaObj);
+        postLogin(captchaObj);
       })
       .onError(() => {
         //your code
         captchaObj.reset();
       });
-    this.onSubmit = () => {
-      if (this.needGeetest) {
+    onSubmit = () => {
+      if (needGeetest) {
         captchaObj.verify();
       } else {
-        this.postLogin(captchaObj);
+        postLogin(captchaObj);
       }
-      //   this.$refs.form.validate(valid => {
-      //     if (valid) {
-      //       if (this.needGeetest) {
-      //         captchaObj.verify();
-      //       } else {
-      //         this.postLogin(captchaObj);
-      //       }
-      //     } else {
-      //       return false;
-      //     }
-      //   });
     };
-  };
+  }
 
-  postLogin = captchaObj => {
+  function postLogin(captchaObj) {
     var req = {
-      // email: this.loginForm.email,
-      password: this.formRef.current.getFieldValue("password")
+      password: formRef.current.getFieldValue("password")
     };
-    if (this.needGeetest) {
+    if (needGeetest) {
       var validate = captchaObj.getValidate();
-      req["gt_server_status"] = this.gt_server_status;
-      req["user_id"] = this.user_id;
+      req["gt_server_status"] = gt_server_status;
+      req["user_id"] = user_id;
       req["geetest_validate"] = validate.geetest_validate;
       req["geetest_challenge"] = validate.geetest_challenge;
       req["geetest_seccode"] = validate.geetest_seccode;
     }
     // this.error.flag = false;
-    this.isLoading = true;
-    if (this.state.activeKey === "email") {
-      req.email = this.formRef.current.getFieldValue("email");
+    isLoading = true;
+    if (activeKey === "email") {
+      req.email = formRef.current.getFieldValue("email");
     } else {
-      req.phone_number = this.formRef.current.getFieldValue("phone");
+      req.phone_number = formRef.current.getFieldValue("phone");
     }
-    this.userInfo = "";
-    // this.$store
-    //   .dispatch("Login", req)
+    userInfo = "";
     AccountApi.login(req)
       .then(res => {
-        this.isLoading = false;
-        // this.redirect = decodeURIComponent(this.$route.query.redirect || "/");
-        // const backUrl = this.$route.query.back_url;
-        // if (!res.activated && !res.sms_validated) {
-        //   // 用户没绑邮箱或者手机号
-        //   let params = {
-        //     userInfo: res,
-        //     redirect: this.redirect
-        //   };
-        //   if (backUrl) {
-        //     // 从其他应用入口来
-        //     params["backUrl"] = true;
-        //     params["href"] = decodeURIComponent(backUrl);
-        //   }
-        //   this.$router.push({
-        //     name: "activaemail",
-        //     params
-        //   });
-        //   return;
-        // }
+        isLoading = false;
         if (!res.app_validated) {
           // 用户没绑两步验证
-          this.$store.dispatch("SetInfo", res).then(() => {
-            // if (backUrl) {
-            //   // 如果从其他应用入口来的
-            //   location.href = decodeURIComponent(backUrl);
-            //   return;
-            // }
-            this.props.history.push("/user/userSetting/info");
+          dispatch({ type: actions.SET_USER, payload: res }).then(() => {
+            History.push("/user/userSetting/info");
           });
           return;
         }
         // 输入两步验证
-        this.userInfo = res;
-        this.setState({
-          dialogVisible: true
-        });
+        userInfo = res;
+        dialogVisible = false;
       })
       .catch(error => {
         if (error.head.code === "1020") {
           //   this.error.flag = true;
           //   this.error.text = this.$t("login.error");
         } else if (error.head.code === "1044") {
-          this.needGeetest = true;
+          needGeetest = true;
           captchaObj.verify();
         } else {
           message.info((error.head && error.head.msg) || error);
         }
-        this.isLoading = false;
+        isLoading = false;
       });
-  };
+  }
 
-  submitCheckGoogle = () => {
-    this.isGoogleCheckBtnLoading = true;
+  function submitCheckGoogle() {
+    isGoogleCheckBtnLoading = true;
     var formData = {
-      otp: this.state.otp
+      otp: otp
     };
     BaseApi.checkOtp(formData, {
-      token: this.userInfo.tokens[0].token,
-      expire_at: this.userInfo.tokens[0].expire_at
+      token: userInfo.tokens[0].token,
+      expire_at: userInfo.tokens[0].expire_at
     })
       .then(() => {
-        this.props.setUserInfo(this.userInfo);
-        // console.log(this.userInfo, 1231232);
-        // this.$message.closeAll();
-        // this.$store.dispatch("SetInfo", this.userInfo).then(() => {
-        //   const backUrl = this.$route.query.back_url;
-        //   if (backUrl) {
-        //     // 如果从其他应用入口来的
-        //     location.href = decodeURIComponent(backUrl);
-        //     return;
-        //   }
-        this.props.history.push("/");
-        // this.$router.push({ path: this.redirect });
-        // });
+        dispatch({ type: actions.SET_USER, payload: userInfo });
+        History.push("/");
       })
       .catch(error => {
         // this.$refs.google.resetCode();
         if (error.head.code === "2013") {
           // this.$message.closeAll();
           message.info((error.head && error.head.msg) || error);
-          // message({
-          //   showClose: true,
-          //   duration: 10000,
-          //   message: error.head.msg + this.$t("login.error-need-reset-time"),
-          //   type: "error"
-          // });
         } else {
           message.info((error.head && error.head.msg) || error);
         }
-        this.isGoogleCheckBtnLoading = false;
+        isGoogleCheckBtnLoading = false;
       });
-  };
+  }
 
-  handleOtpChange = e => {
-    this.setState({
-      otp: e.target.value
-    });
-  };
-}
+  function handleOtpChange(e) {
+    otp = e.target.value;
+  }
+
+  return (
+    <div className="login-wrapper" loading={isLoading}>
+      <div className="login-content">
+        <p className="login-title">Login</p>
+        <Form
+          ref={formRef}
+          {...layout}
+          name="basic"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+        >
+          <Tabs
+            defaultActiveKey="1"
+            activeKey={activeKey}
+            onChange={onTabChange}
+          >
+            <TabPane tab="email" key="email">
+              <Form.Item
+                label="email"
+                name="email"
+                rules={[
+                  { required: true, message: "Please input your email!" }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </TabPane>
+            <TabPane tab="phone" key="phone">
+              <Form.Item
+                label="Phone"
+                name="Phone"
+                rules={[
+                  { required: true, message: "Please input your Phone!" }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </TabPane>
+          </Tabs>
+
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item {...tailLayout} name="remember" valuePropName="checked">
+            <Checkbox>Remember me</Checkbox>
+          </Form.Item>
+
+          <Form.Item {...tailLayout}>
+            <Button type="primary" htmlType="submit" loading={geetestLoading}>
+              Login
+            </Button>
+          </Form.Item>
+        </Form>
+        <div className="tip-register">
+          <router-link className="forget-pwd" to="/forgetpwd">
+            login.forget-pw
+          </router-link>
+
+          <span className="register-link" onClick={goRegister}>
+            login.register
+          </span>
+        </div>
+      </div>
+      <GoogleCheck
+        //   ref="google"
+        confirmLoading={isGoogleCheckBtnLoading}
+        onCancel={cancelCheckGoogle}
+        onOk={submitCheckGoogle}
+        visible={dialogVisible}
+        onChange={handleOtpChange}
+      />
+    </div>
+  );
+};
 
 function GoogleCheck(props) {
   return (
@@ -362,8 +276,4 @@ function GoogleCheck(props) {
   );
 }
 
-export default connect(null, dispatch => ({
-  setUserInfo(info) {
-    dispatch(setUserInfo(info));
-  }
-}))(Login);
+export default Login;
