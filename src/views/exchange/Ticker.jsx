@@ -8,16 +8,16 @@ const Ticker = () => {
   const [curTab, setCurTab] = useState("");
   const [curTickers, setCurTickers] = useState([]);
   const [tabs, setTabs] = useState([]);
-  let [{ tickers, quotes }, dispatch] = useContext(GlobalContext);
+  const [state, dispatch] = useContext(GlobalContext);
 
   useEffect(() => {
     dispatch(getTickers()).then(() => {
-      // tickers = state.tickers;
       getTabs();
     });
   }, []);
 
   function getTabs() {
+    const tickers = state.tickers;
     let tabs = [];
     tickers.forEach(ticker => {
       if (tabs.indexOf(ticker.quote) < 0) {
@@ -29,6 +29,7 @@ const Ticker = () => {
   }
 
   function handleTabChange(tab) {
+    const tickers = state.tickers;
     setCurTab(tab);
     const list = tickers.filter(item => item.quote === tab);
     setCurTickers(list);
@@ -74,6 +75,7 @@ const Ticker = () => {
     }
   };
 
+  const quotes = state.quotes || {};
   const price = quotes[curTab] ? quotes[curTab]["rfinex_CNY"] : 0;
 
   return (

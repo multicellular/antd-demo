@@ -13,7 +13,7 @@ const HookProvider = ({ children }) => {
       const result = payload();
       if (typeof result === "object" && result.then) {
         result.then(res => dispatch({ type, payload: res }));
-        return payload;
+        return result;
       } else {
         dispatch({ type, payload: result });
         return new Promise.resolve(result);
