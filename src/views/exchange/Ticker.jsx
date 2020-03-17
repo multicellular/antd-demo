@@ -4,7 +4,7 @@ import { getTickers, GlobalContext } from "@stores/hookActions";
 
 const { TabPane } = Tabs;
 
-const Ticker = () => {
+const Ticker = props => {
   const [curTab, setCurTab] = useState("");
   const [curTickers, setCurTickers] = useState([]);
   const [tabs, setTabs] = useState([]);
@@ -44,7 +44,7 @@ const Ticker = () => {
       </Row>
     ),
     Body: props => {
-      const { list, price } = props;
+      const { list, price, handleClick } = props;
       return (
         <div className="table-body">
           {list.map(item => (
@@ -55,7 +55,7 @@ const Ticker = () => {
               placement="right"
               key={item.name}
             >
-              <Row className="table-row">
+              <Row className="table-row" onClick={handleClick(item)}>
                 <Col className="row-name" span={8}>
                   {item.code.toUpperCase()}/{item.quote.toUpperCase()}
                 </Col>
@@ -87,7 +87,11 @@ const Ticker = () => {
       </Tabs>
       <div className="table-wrapper">
         <Table.Header></Table.Header>
-        <Table.Body list={curTickers} price={price}></Table.Body>
+        <Table.Body
+          list={curTickers}
+          price={price}
+          handleClick={props.handleClick}
+        ></Table.Body>
       </div>
     </div>
   );

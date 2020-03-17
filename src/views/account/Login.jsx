@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { BaseApi, AccountApi } from "@apis";
 import { Form, Input, Modal, Button, Checkbox, Tabs, message } from "antd";
 import "@libs/gt";
@@ -11,17 +11,17 @@ const { TabPane } = Tabs;
 const Login = props => {
   const [, dispatch] = useContext(GlobalContext);
   const History = props.history;
-  let isLoading = false,
-    dialogVisible = false,
-    isGoogleCheckBtnLoading = false,
-    needGeetest = false,
-    userInfo = "",
-    geetestLoading = true,
-    activeKey = "email",
+  const [geetestLoading, setLoading] = useState(true);
+  const [activeKey, setKey] = useState("email");
+  const [dialogVisible, setVisible] = useState(false);
+  const [isGoogleCheckBtnLoading, setGoogleCheckBtnLoading] = useState(false);
+  const [userInfo, setUser] = useState("");
+  let needGeetest = false,
+    gt_server_status,
+    user_id,
     otp = "";
-  let gt_server_status, user_id;
-  const formRef = React.createRef();
-  let onSubmit = () => {};
+  const formRef = useRef();
+  const [onSubmit, setSubmit] = useState();
 
   useEffect(() => {
     geetest();
@@ -36,31 +36,34 @@ const Login = props => {
   };
 
   function onFinish(values) {
-    onSubmit();
+    console.log(onSubmit);
+    if (onSubmit) {
+      onSubmit();
+    }
   }
 
   function onFinishFailed(error) {}
 
   function cancelCheckGoogle() {
-    userInfo = "";
-    dialogVisible = false;
+    setUser("");
+    setVisible(false);
   }
 
-  function onTabChange() {}
+  function onTabChange(key) {
+    setKey(key);
+  }
 
   function goRegister() {}
 
   // const onClickLogin = () => {};
 
-  function geetest() {
+  const geetest = () => {
     const initGeetest = window.initGeetest;
-    // this.geetestLoading = true;
     BaseApi.getGeeTest().then(data => {
       if (!data) {
         return;
       }
-      // this.geetestLoading = false;
-      geetestLoading = false;
+      setLoading(false);
       gt_server_status = data.success;
       user_id = data.user_id;
       // 使用initGeetest接口
@@ -77,9 +80,9 @@ const Login = props => {
         geetestHandler
       );
     });
-  }
+  };
 
-  function geetestHandler(captchaObj) {
+  const geetestHandler = captchaObj => {
     captchaObj
       .onReady(() => {
         //验证码ready之后才能调用verify方法显示验证码
@@ -91,14 +94,15 @@ const Login = props => {
         //your code
         captchaObj.reset();
       });
-    onSubmit = () => {
+    let submit = () => () => {
       if (needGeetest) {
         captchaObj.verify();
       } else {
         postLogin(captchaObj);
       }
     };
-  }
+    setSubmit(submit);
+  };
 
   function postLogin(captchaObj) {
     var req = {
@@ -113,16 +117,14 @@ const Login = props => {
       req["geetest_seccode"] = validate.geetest_seccode;
     }
     // this.error.flag = false;
-    isLoading = true;
     if (activeKey === "email") {
       req.email = formRef.current.getFieldValue("email");
     } else {
       req.phone_number = formRef.current.getFieldValue("phone");
     }
-    userInfo = "";
+    setUser("");
     AccountApi.login(req)
       .then(res => {
-        isLoading = false;
         if (!res.app_validated) {
           // 用户没绑两步验证
           dispatch({ type: actions.SET_USER, payload: res }).then(() => {
@@ -131,8 +133,8 @@ const Login = props => {
           return;
         }
         // 输入两步验证
-        userInfo = res;
-        dialogVisible = false;
+        setUser(res);
+        setVisible(true);
       })
       .catch(error => {
         if (error.head.code === "1020") {
@@ -144,12 +146,11 @@ const Login = props => {
         } else {
           message.info((error.head && error.head.msg) || error);
         }
-        isLoading = false;
       });
   }
 
   function submitCheckGoogle() {
-    isGoogleCheckBtnLoading = true;
+    setGoogleCheckBtnLoading(true);
     var formData = {
       otp: otp
     };
@@ -169,7 +170,7 @@ const Login = props => {
         } else {
           message.info((error.head && error.head.msg) || error);
         }
-        isGoogleCheckBtnLoading = false;
+        setGoogleCheckBtnLoading(false);
       });
   }
 
@@ -178,7 +179,7 @@ const Login = props => {
   }
 
   return (
-    <div className="login-wrapper" loading={isLoading}>
+    <div className="login-wrapper">
       <div className="login-content">
         <p className="login-title">Login</p>
         <Form
@@ -224,10 +225,6 @@ const Login = props => {
             rules={[{ required: true, message: "Please input your password!" }]}
           >
             <Input.Password />
-          </Form.Item>
-
-          <Form.Item {...tailLayout} name="remember" valuePropName="checked">
-            <Checkbox>Remember me</Checkbox>
           </Form.Item>
 
           <Form.Item {...tailLayout}>

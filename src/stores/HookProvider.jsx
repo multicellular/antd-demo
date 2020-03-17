@@ -16,11 +16,11 @@ const HookProvider = ({ children }) => {
         return result;
       } else {
         dispatch({ type, payload: result });
-        return new Promise.resolve(result);
+        return Promise.resolve(result);
       }
     } else {
       dispatch({ type, payload });
-      return new Promise.resolve(payload);
+      return Promise.resolve(payload);
     }
   };
 

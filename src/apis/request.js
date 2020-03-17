@@ -1,11 +1,15 @@
 import axios from "axios";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { message } from "antd";
-import store from "@stores/store";
+// import store from "@stores/store";
+import cookies from "browser-cookies";
 const crypto = require("crypto");
 
-const state = store.getState();
-console.log(state);
+let tokens = cookies.get("r-tokens");
+try {
+  tokens = JSON.parse(tokens) || {};
+} catch (error) {}
+// const state = store.getState();
 
 const defaultConfig = {
   baseURL: "/api/v4",
@@ -92,7 +96,7 @@ instance.interceptors.response.use(
 function axiosHeaderInterceptor(config) {
   // eslint-disable-next-line
   // 自定义请求拦截逻辑，可以处理权限，请求发送监控等
-  let tokens = state.common.tokens || {};
+  // let tokens = tokens || {};
   if (config.tokens) {
     tokens = config.tokens;
   }
@@ -134,17 +138,17 @@ function axiosHeaderInterceptor(config) {
       tokens.expire_at
     );
   }
-  let languageStr;
-  switch (state.common.language) {
-    case "jap":
-      languageStr = "ja-JP";
-      break;
-    case "kor":
-      languageStr = "ko";
-      break;
-    default:
-      languageStr = state.common.language;
-  }
+  let languageStr = "zh-CN";
+  // switch (state.common.language) {
+  //   case "jap":
+  //     languageStr = "ja-JP";
+  //     break;
+  //   case "kor":
+  //     languageStr = "ko";
+  //     break;
+  //   default:
+  //     languageStr = state.common.language;
+  // }
   config.headers["Accept-Language"] = languageStr;
   if (
     config.method === "post" ||

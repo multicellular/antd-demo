@@ -40,7 +40,6 @@ export const globalReducer = (state, { type, payload }) => {
       state.quotes = payload || {};
       return state;
     case actions.SET_TICKERS:
-        console.log('actions.SET_TICKERS');
       state.tickers = payload || [];
       return state;
     default:
