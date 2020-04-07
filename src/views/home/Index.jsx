@@ -1,9 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
-import Banner from "./Banner";
-import Content from "./Content";
-import Turnover from "./Turnover";
+import Banner from "./banner";
+import Content from "./content";
+import Turnover from "./turnover";
 import "./less/index.less";
-import { BaseApi } from "@apis";
+import { BaseApi } from "@apis/index";
 import { getQuotes, GlobalContext } from "@stores/hookActions";
 
 const Home = () => {

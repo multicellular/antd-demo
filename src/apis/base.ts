@@ -1,7 +1,15 @@
 import request from "./request";
 
+export interface GtResponse {
+  success: boolean,
+  user_id: string,
+  gt: string,
+  challenge: string
+}
+
 // 极验行为验证
-export function getGeeTest() {
+export function getGeeTest(): Promise<GtResponse> {
+  // or return request<GtResponse>({
   return request({
     url: `/geetest`,
     method: "get",
@@ -10,8 +18,8 @@ export function getGeeTest() {
 }
 
 // 验证google两步验证的6位验证码
-export function checkOtp(data, tokens) {
-  return request({
+export function checkOtp(data: { otp: string }, tokens: { token: string, expire_at: string }) {
+  return request<void>({
     url: `/members/otp`,
     method: "post",
     data,
@@ -28,7 +36,7 @@ export function getMe() {
 }
 
 // 获取Banner图
-export function getBanners(params) {
+export function getBanners(params: { platform: string } = { platform: 'pc' }) {
   return request({
     url: `/banner/list`,
     method: "get",
@@ -55,8 +63,14 @@ export function getNotice() {
   });
 }
 
+export interface QuotesReqParams {
+  symbols: string;
+  currency: string;
+  source: string;
+}
+
 // 获取币价
-export function getQuotes(params) {
+export function getQuotes(params: QuotesReqParams) {
   return request({
     url: `https://api.bitip.in/api/quotes`,
     method: "get",
@@ -65,8 +79,14 @@ export function getQuotes(params) {
   });
 }
 
+export interface TickerReqParams {
+  market: string;
+  period: number;
+  timestamp: number;
+
+}
 // 指定时间和市场的K线数据
-export function getTickerK(params) {
+export function getTickerK(params: TickerReqParams) {
   return request({
     url: `/k`,
     method: "get",
@@ -76,7 +96,7 @@ export function getTickerK(params) {
 }
 
 // 市场的K线数据
-export function getKChart(params) {
+export function getKChart(params: { market: string }) {
   return request({
     url: `/chart`,
     method: "get",
@@ -86,7 +106,7 @@ export function getKChart(params) {
 }
 
 // 成交历史数据
-export function getTrades(params) {
+export function getTrades(params: { market: string, limit: string }) {
   return request({
     url: `/trades`,
     method: "get",
@@ -96,7 +116,7 @@ export function getTrades(params) {
 }
 
 // 挂单深度数据
-export function getDepth(params) {
+export function getDepth(params: { market: string, limit: string }) {
   return request({
     url: `/depth`,
     method: "get",

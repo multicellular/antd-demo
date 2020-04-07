@@ -2,11 +2,11 @@ import React from "react";
 import { Route, Redirect, Switch } from "react-router-dom";
 // import { isLogin } from "./common";
 
-import Home from "@views/home/Index"; // 首页
-import Exchange from "@views/exchange/Index"; // 币币交易
+import Home from "@views/home"; // 首页
+import Exchange from "@/views/exchange/Exchange"; // 币币交易
 // import User, { UserInfo, UserAssets } from "@pages/user"; // 首页
-import Login from "@views/account/Login"; // 登录相关
-import NotFound from "@views/base/NotFound";
+import Login from "@/views/account/Login"; // 登录相关
+import NotFound from "@/views/base/NotFound";
 
 // const PrivateRoute = ({
 //     children,

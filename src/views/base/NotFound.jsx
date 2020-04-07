@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "antd";
-import "./less/notfound.less";
+import "./less/not-found.less";
 
 // 声明组件  并对外输出
 export default class notfound extends Component {

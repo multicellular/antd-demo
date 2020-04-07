@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Col } from "antd";
 
-import { BaseApi } from "@apis";
+import { BaseApi } from "@apis/index";
 import Ticker from "./Ticker";
 import KLine from "./KLine";
 import DataTable from "./DataTable";

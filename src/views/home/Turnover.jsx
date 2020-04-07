@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import AreaChart from "./AreaChart";
+import AreaChart from "./area-chart";
 
 import { GlobalContext } from "@stores/hookActions";
 

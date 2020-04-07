@@ -1,27 +1,28 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { BaseApi, AccountApi } from "@apis";
-import { Form, Input, Modal, Button, Checkbox, Tabs, message } from "antd";
+import { BaseApi, AccountApi } from "@apis/index";
+import { Form, Input, Modal, Button, Tabs, message } from "antd";
 import "@libs/gt";
 import "./less/login.less";
+import { History } from "history";
 
 import actions, { GlobalContext } from "@stores/hookActions";
 
 const { TabPane } = Tabs;
 
-const Login = props => {
+const Login = ({ history }: { history: History }) => {
   const [, dispatch] = useContext(GlobalContext);
-  const History = props.history;
+  // const History = props.history;
   const [geetestLoading, setLoading] = useState(true);
   const [activeKey, setKey] = useState("email");
   const [dialogVisible, setVisible] = useState(false);
   const [isGoogleCheckBtnLoading, setGoogleCheckBtnLoading] = useState(false);
-  const [userInfo, setUser] = useState("");
+  const [userInfo, setUser] = useState({ tokens: [] });
   let needGeetest = false,
-    gt_server_status,
-    user_id,
+    gt_server_status: boolean,
+    user_id: string,
     otp = "";
-  const formRef = useRef();
-  const [onSubmit, setSubmit] = useState();
+  const formRef: any = useRef();
+  const [onSubmit, setSubmit] = useState<Function>();
 
   useEffect(() => {
     geetest();
@@ -35,28 +36,26 @@ const Login = props => {
     wrapperCol: { offset: 8, span: 16 }
   };
 
-  function onFinish(values) {
-    console.log(onSubmit);
+  function onFinish(/*values*/) {
     if (onSubmit) {
       onSubmit();
     }
   }
 
-  function onFinishFailed(error) {}
+  function onFinishFailed(error: any) {}
 
   function cancelCheckGoogle() {
-    setUser("");
+    setUser({ tokens: [] });
     setVisible(false);
   }
 
-  function onTabChange(key) {
+  function onTabChange(key: string) {
     setKey(key);
   }
 
   function goRegister() {}
 
   // const onClickLogin = () => {};
-
   const geetest = () => {
     const initGeetest = window.initGeetest;
     BaseApi.getGeeTest().then(data => {
@@ -82,7 +81,7 @@ const Login = props => {
     });
   };
 
-  const geetestHandler = captchaObj => {
+  const geetestHandler = (captchaObj: any) => {
     captchaObj
       .onReady(() => {
         //验证码ready之后才能调用verify方法显示验证码
@@ -104,8 +103,8 @@ const Login = props => {
     setSubmit(submit);
   };
 
-  function postLogin(captchaObj) {
-    var req = {
+  function postLogin(captchaObj: any) {
+    var req: any = {
       password: formRef.current.getFieldValue("password")
     };
     if (needGeetest) {
@@ -122,13 +121,13 @@ const Login = props => {
     } else {
       req.phone_number = formRef.current.getFieldValue("phone");
     }
-    setUser("");
+    setUser({ tokens: [] });
     AccountApi.login(req)
-      .then(res => {
+      .then((res: any) => {
         if (!res.app_validated) {
           // 用户没绑两步验证
           dispatch({ type: actions.SET_USER, payload: res }).then(() => {
-            History.push("/user/userSetting/info");
+            history.push("/user/userSetting/info");
           });
           return;
         }
@@ -154,13 +153,14 @@ const Login = props => {
     var formData = {
       otp: otp
     };
+    let info: any = userInfo.tokens[0] || {};
     BaseApi.checkOtp(formData, {
-      token: userInfo.tokens[0].token,
-      expire_at: userInfo.tokens[0].expire_at
+      token: info.token,
+      expire_at: info.expire_at
     })
       .then(() => {
         dispatch({ type: actions.SET_USER, payload: userInfo });
-        History.push("/");
+        history.push("/");
       })
       .catch(error => {
         // this.$refs.google.resetCode();
@@ -174,7 +174,7 @@ const Login = props => {
       });
   }
 
-  function handleOtpChange(e) {
+  function handleOtpChange(e: any) {
     otp = e.target.value;
   }
 
@@ -234,9 +234,9 @@ const Login = props => {
           </Form.Item>
         </Form>
         <div className="tip-register">
-          <router-link className="forget-pwd" to="/forgetpwd">
+          {/* <router-link className="forget-pwd" to="/forgetpwd">
             login.forget-pw
-          </router-link>
+          </router-link> */}
 
           <span className="register-link" onClick={goRegister}>
             login.register
@@ -255,7 +255,7 @@ const Login = props => {
   );
 };
 
-function GoogleCheck(props) {
+function GoogleCheck(props: any) {
   return (
     <Modal
       title="Enter Otp"

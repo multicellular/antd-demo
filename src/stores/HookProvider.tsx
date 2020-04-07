@@ -2,17 +2,23 @@ import React, { useReducer } from "react";
 
 import { GlobalContext, globalReducer, initState } from "./hookActions";
 
-const HookProvider = ({ children }) => {
+const HookProvider = ({ children }: { children: any }) => {
   const [state, dispatch] = useReducer(globalReducer, initState);
 
-  const customDispatch = dispatch => ({ type, payload }) => {
+  const customDispatch = (dispatch: React.Dispatch<any>) => ({
+    type,
+    payload
+  }: {
+    type: string;
+    payload: any;
+  }) => {
     if (typeof payload === "object" && payload.then) {
-      payload.then(res => dispatch({ type, payload: res }));
+      payload.then((res: any) => dispatch({ type, payload: res }));
       return payload;
     } else if (typeof payload === "function") {
       const result = payload();
       if (typeof result === "object" && result.then) {
-        result.then(res => dispatch({ type, payload: res }));
+        result.then((res: any) => dispatch({ type, payload: res }));
         return result;
       } else {
         dispatch({ type, payload: result });

@@ -2,10 +2,10 @@ import React, { useContext } from "react";
 import { BrowserRouter } from "react-router-dom";
 import _isEmpty from "lodash/isEmpty";
 
-import Routes from "@configs/router.config";
-import { BaseApi } from "@apis";
-import Header from "@views/base/Header";
-import Footer from "@views/base/Footer";
+import Routes from "@configs/Router.config";
+import { BaseApi } from "@apis/index";
+import Header from "@/views/base/Header";
+import Footer from "@/views/base/Footer";
 import "./App.less";
 
 // import HookProvider from "@stores/HookProvider";

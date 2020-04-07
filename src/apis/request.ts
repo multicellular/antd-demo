@@ -5,10 +5,11 @@ import { message } from "antd";
 import cookies from "browser-cookies";
 const crypto = require("crypto");
 
-let tokens = cookies.get("r-tokens");
+let tokenCookie: string = cookies.get("r-tokens") || '';
+let tokens: { token: string, expire_at: string };
 try {
-  tokens = JSON.parse(tokens) || {};
-} catch (error) {}
+  tokens = JSON.parse(tokenCookie);
+} catch (error) { }
 // const state = store.getState();
 
 const defaultConfig = {
@@ -18,18 +19,18 @@ const defaultConfig = {
   maxContentLength: 2000,
   retry: 2, // 超时再次请求次数
   retryDelay: 1000, // 超时后再次发起请求的时间间隔
-  validateStatus: function(status) {
+  validateStatus: function (status: number) {
     return status >= 200 && status < 500; // 默认的
   }
 };
 const instance = axios.create(defaultConfig);
 // 添加请求拦截器
 instance.interceptors.request.use(
-  function(config) {
+  function (config) {
     // 在发送请求之前做些什么
     return axiosHeaderInterceptor(config);
   },
-  function(error) {
+  function (error) {
     // 对请求错误做些什么
     return Promise.reject(error);
   }
@@ -37,22 +38,17 @@ instance.interceptors.request.use(
 
 // 添加响应拦截器
 instance.interceptors.response.use(
-  function(response) {
-    // 对响应数据做点什么
-    // const reqConfig = response.config;
-    // if (reqConfig.needHead) {
-    //   return response.data;
+  function (response) {
+    // const resData = response.data;
+    // const { head, body } = resData;
+    // if (head && head.code === "1000") {
+    //   return body;
+    // } else {
+    //   return Promise.reject(resData);
     // }
-    const resData = response.data;
-    const { head, body } = resData;
-    if (head && head.code === "1000") {
-      return body;
-    } else {
-      return Promise.reject(resData);
-    }
-    // return response;
+    return response
   },
-  function(error) {
+  function (error) {
     // 对响应错误做点什么
     if (error.response && error.response.status >= 500) {
       message.error("服务器未知错误，请稍后重试!");
@@ -67,12 +63,17 @@ instance.interceptors.response.use(
           return Promise.reject(head);
         } else {
           message.warning("请重新登录!");
-          useHistory().push({
-            path: "/login",
+          // useHistory().push({
+          //   path: "/login",
+          //   query: {
+          //     redirect: useRouteMatch().fullPath
+          //   }
+          // })
+          useHistory().push('/login', {
             query: {
-              redirect: useRouteMatch().fullPath
+              redirect: useRouteMatch().path
             }
-          });
+          })
           return Promise.reject(head);
         }
       }
@@ -93,7 +94,7 @@ instance.interceptors.response.use(
   }
 );
 
-function axiosHeaderInterceptor(config) {
+function axiosHeaderInterceptor(config: any) {
   // eslint-disable-next-line
   // 自定义请求拦截逻辑，可以处理权限，请求发送监控等
   // let tokens = tokens || {};
@@ -104,7 +105,7 @@ function axiosHeaderInterceptor(config) {
     let url =
       (config.baseURL.replace("/test/api/", "/api/") || "/api/v4") + config.url;
     let queryStr = "";
-    let tonce = Date.parse(new Date()) / 1000;
+    let tonce = new Date().getTime() / 1000;
     const method = config.method.toUpperCase();
     if (method === "GET" || method === "DELETE") {
       const params = {
@@ -167,7 +168,7 @@ function axiosHeaderInterceptor(config) {
   return config;
 }
 
-function axiosRetryInterceptor(err) {
+function axiosRetryInterceptor(err: any) {
   var config = err.config;
   // If config does not exist or the retry option is not set, reject
   if (!config || !config.retry) return Promise.reject(err);
@@ -185,14 +186,14 @@ function axiosRetryInterceptor(err) {
   config.__retryCount += 1;
 
   // Create new promise to handle exponential backoff
-  var backoff = new Promise(function(resolve) {
-    setTimeout(function() {
+  var backoff = new Promise(function (resolve) {
+    setTimeout(function () {
       resolve();
     }, config.retryDelay || 1);
   });
 
   // Return the promise in which recalls axios to retry the request
-  return backoff.then(function() {
+  return backoff.then(function () {
     //  // url会因为baseURL不停的叠加
     config.url = config.url.replace(config.baseURL, "");
     //  if (_isJSON(config.data)) {
@@ -204,7 +205,7 @@ function axiosRetryInterceptor(err) {
 }
 
 // 签名算法
-function _getHmacSHA256(method, url, fields, expire_at) {
+function _getHmacSHA256(method: string, url: string, fields: string, expire_at: string) {
   let message = method + "|" + url + "|" + fields;
   console.log(message);
   let str = crypto
@@ -214,4 +215,25 @@ function _getHmacSHA256(method, url, fields, expire_at) {
   return str;
 }
 
-export default instance;
+interface BaseResponse<T> {
+  head?: {
+    code: string,
+    msg?: string
+  };
+  body?: T
+}
+
+// instance(config)
+const request = <T>(config: any): Promise<T> => new Promise((reslove, reject) => {
+  instance.request<BaseResponse<T>>(config).then(res => {
+    const _data = res.data;
+    if (_data.head && _data.head.code === "1000") {
+      // reslove(_data) return Promise<BaseResponse<T>>
+      reslove(_data.body) //兼容目前代码
+    } else {
+      reject(_data.head)
+    }
+  });
+});
+
+export default request;
