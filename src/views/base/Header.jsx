@@ -18,7 +18,7 @@ class Header extends React.Component {
   render() {
     const navs = [
       {
-        to: "/",
+        to: "/home",
         children: <p>首页</p>
       },
       {

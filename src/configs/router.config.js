@@ -17,7 +17,6 @@ import NotFound from "@views/base/NotFound";
 
 const Routes = () => (
   <Switch>
-    <Redirect from="/" to="/home" />
     <Route exact path="/home" component={Home} />
     <Route exact path="/login" component={Login} />
     <Route exact path="/exchange" component={Exchange} />
@@ -44,6 +43,7 @@ const Routes = () => (
     {/* <PrivateRoute path="/protected">
                 <Route exact path="/nav" component={Layout.Nav} />
             </PrivateRoute> */}
+    <Redirect exact from="/" to="/home" />
     <Route component={NotFound} />
   </Switch>
 );
