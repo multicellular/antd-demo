@@ -17,7 +17,7 @@ import NotFound from "@views/base/NotFound";
 
 const Routes = () => (
   <Switch>
-    <Redirect exact from="/" to="/home" />
+    <Redirect from="/" to="/home" />
     <Route exact path="/home" component={Home} />
     <Route exact path="/login" component={Login} />
     <Route exact path="/exchange" component={Exchange} />
